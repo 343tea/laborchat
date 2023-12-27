@@ -86,22 +86,30 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         qvector = query_to_embedding(prompt)
         nearest = vector_similarity(qvector)
 
+        # 청크와 링크 쌍을 저장할 리스트 초기화
+        selected_chunks = []
+
+        # 중복 링크를 거르기 위한 집합
+        processed_links = set()
+
+        # 청크 리스트와 관련 내용 추출
+        for match in nearest.matches:
+            if len(selected_chunks) < 3:
+                chunk = match.metadata['chunk']
+                link = match.metadata['link']
+
+                # 중복되지 않은 링크만 처리
+                if link not in processed_links:
+                    processed_links.add(link)
+                    title = chunk.split('|')[0]
+                    selected_chunks.append((title, link))
+            else:
+                break
+
+        # selected_chunks를 사용해 best 문자열 생성
         best = ''
-        chunk_list = []
-        for i, match in enumerate(nearest.matches):
-            chunk = match.metadata['chunk']
-            chunk_list.append(chunk)
-
-            if i == 0:
-                title1 = chunk.split('|')[0]
-                link1 = match.metadata['link']
-                best = f'\n\n▲ 관련 내용 1 : [{title1}](https://{link1})'
-            elif i == 1:
-                title2 = chunk.split('|')[0]
-                link2 = match.metadata['link']
-                if link1 != link2:
-                    best += f'\n\n▲ 관련 내용 2 : [{title2}](https://{link2})'
-
+        for i, (title, link) in enumerate(selected_chunks):
+            best += f'\n\n▲ 관련 내용 {i + 1} : [{title}](https://{link})'
 
         st.session_state.messages.append({'role': 'system', 'content': f'관련 청크: {chunk_list}'})
         st.session_state.messages.append({'role': 'user', 'content': prompt})
