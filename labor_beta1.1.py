@@ -86,18 +86,21 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         qvector = query_to_embedding(prompt)
         nearest = vector_similarity(qvector)
 
-        # 청크 리스트 생성
-        chunk_list = [match.metadata['chunk'] for match in nearest.matches]
+        chunk_list = []
+        for i, match in enumerate(nearest.matches):
+            chunk = match.metadata['chunk']
+            chunk_list.append(chunk)
 
-        # 중복 제거
-        unique_chunks = list(set(chunk_list))
+            if i == 0:
+                title1 = chunk.split('|')[0]
+                link1 = match.metadata['link']
+                best = f'\n\n▲ 관련 내용 1 : [{title}](https://{link})'
+            elif i == 1:
+                title2 = chunk.split('|')[0]
+                link2 = match.metadata['link']
+                if link1 != link2:
+                    best += f'\n\n▲ 관련 내용 2 : [{title2}](https://{link2})'
 
-        # unique_chunks에 있는 청크들에 대한 정보를 best 변수에 저장
-        best = ''
-        for i, chunk in enumerate(unique_chunks[:2]):  # 상위 2개 청크만 사용
-            title = chunk.split('|')[0]
-            link = nearest.matches[i].metadata['link']
-            best += f'\n\n▲ 관련 내용 {i + 1}: [{title}](https://{link})'
 
         st.session_state.messages.append({'role': 'system', 'content': f'관련 청크: {chunk_list}'})
         st.session_state.messages.append({'role': 'user', 'content': prompt})
@@ -135,7 +138,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         save_to_firebase(db, st.session_state['session_id'], prompt, completed_response)
 
         # 답변을 session_state의 message 목록에 추가
-        st.session_state.messages.append({'role': 'assistant', 'content': completed_response})
+        st.session_state.messages.append({'role': 'assistant', 'content': full_response})
 
     else:
         # 질문 한도를 초과한 경우
