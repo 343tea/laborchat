@@ -2,3 +2,4 @@ openai
 pinecone-client
 streamlit
 firebase_admin
+pytz

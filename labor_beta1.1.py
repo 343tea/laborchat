@@ -4,6 +4,7 @@ import streamlit as st
 from firebase_admin import _apps, credentials, initialize_app, firestore
 import uuid
 from datetime import datetime
+import pytz
 
 def connect_to_openai():
     return OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
@@ -43,8 +44,8 @@ def vector_similarity(qvector):
     )
     return nearest
 
-def save_to_firebase(db, session_id, question, answer):
-    current_time = datetime.now()
+def save_to_firebase(db, session_id, question, answer, korea_timezone):
+    current_time = datetime.now(korea_timezone)
     timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
     history = {'timestamp': timestamp, 'session_id': session_id, 'qustion': question, 'answer': answer}
     db.collection('chat_history').document(timestamp).set(history)
@@ -83,6 +84,7 @@ st.subheader('version beta1.1')
 client = connect_to_openai()
 index = connect_to_pinecone()
 db, info = connect_to_firebase()
+korea_timezone = pytz.timezone('Asia/Seoul')
 
 # 초기화할 세션 상태 변수들과 그 기본값 정의
 default_values = {
@@ -153,7 +155,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
             message_placeholder.markdown(completed_response)
 
         # Firebase에 질문과 답변 저장
-        save_to_firebase(db, st.session_state['session_id'], prompt, completed_response)
+        save_to_firebase(db, st.session_state['session_id'], prompt, completed_response, korea_timezone)
 
         # 답변을 session_state의 message 목록에 추가
         st.session_state.messages.append({'role': 'assistant', 'content': completed_response})
