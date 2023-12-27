@@ -139,7 +139,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         save_to_firebase(db, st.session_state['session_id'], prompt, completed_response)
 
         # 답변을 session_state의 message 목록에 추가
-        st.session_state.messages.append({'role': 'assistant', 'content': full_response})
+        st.session_state.messages.append({'role': 'assistant', 'content': completed_response})
 
     else:
         # 질문 한도를 초과한 경우
