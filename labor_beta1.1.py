@@ -49,7 +49,7 @@ def save_to_firebase(db, session_id, question, answer):
     db.collection('chat_history').add(history)
 
 
-st.title('노무 상담 챗봇')
+st.title('노무법인 시선 - 가디언')
 st.subheader('version beta1.1')
 
 client = connect_to_openai()
