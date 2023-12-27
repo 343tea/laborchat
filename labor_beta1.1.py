@@ -82,7 +82,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
     # 질문 횟수 카운트
     st.session_state.question_count += 1
 
-    if st.session_state.question_count < 10:
+    if st.session_state.question_count < 1000:
         qvector = query_to_embedding(prompt)
         nearest = vector_similarity(qvector)
 
