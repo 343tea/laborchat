@@ -49,6 +49,34 @@ def save_to_firebase(db, session_id, question, answer):
     db.collection('chat_history').add(history)
 
 
+def select_best(nearest):
+    # 청크와 링크 쌍을 저장할 리스트 초기화
+    selected_chunks = []
+
+    # 중복 링크를 거르기 위한 집합
+    processed_links = set()
+
+    # 청크 리스트와 관련 내용 추출
+    for match in nearest.matches:
+        if len(selected_chunks) < 3:
+            chunk = match.metadata['chunk']
+            link = match.metadata['link']
+
+            # 중복되지 않은 링크만 처리
+            if link not in processed_links:
+                processed_links.add(link)
+                title = chunk.split('|')[0]
+                selected_chunks.append((title, link))
+        else:
+            break
+
+    # selected_chunks를 사용해 best 문자열 생성
+    best = ''
+    for i, (title, link) in enumerate(selected_chunks):
+        best += f'\n\n▲ 관련 내용 {i + 1} : [{title}](https://{link})'
+    return best
+
+
 st.title('노무법인 시선 - 가디언')
 st.subheader('version beta1.1')
 
@@ -86,30 +114,11 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         qvector = query_to_embedding(prompt)
         nearest = vector_similarity(qvector)
 
-        # 청크와 링크 쌍을 저장할 리스트 초기화
-        selected_chunks = []
+        # 청크 리스트 추출
+        chunk_list = [match.metadata['chunk'] for match in nearest.matches]
 
-        # 중복 링크를 거르기 위한 집합
-        processed_links = set()
-
-        # 청크 리스트와 관련 내용 추출
-        for match in nearest.matches:
-            if len(selected_chunks) < 3:
-                chunk = match.metadata['chunk']
-                link = match.metadata['link']
-
-                # 중복되지 않은 링크만 처리
-                if link not in processed_links:
-                    processed_links.add(link)
-                    title = chunk.split('|')[0]
-                    selected_chunks.append((title, link))
-            else:
-                break
-
-        # selected_chunks를 사용해 best 문자열 생성
-        best = ''
-        for i, (title, link) in enumerate(selected_chunks):
-            best += f'\n\n▲ 관련 내용 {i + 1} : [{title}](https://{link})'
+        # 관련 블로그 포스트 링크 추출
+        best = select_best(nearest)
 
         st.session_state.messages.append({'role': 'system', 'content': f'관련 청크: {chunk_list}'})
         st.session_state.messages.append({'role': 'user', 'content': prompt})
