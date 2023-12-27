@@ -50,7 +50,7 @@ def save_to_firebase(db, session_id, question, answer):
 
 
 st.title('노무 상담 챗봇')
-st.subheader('version beta1.1')
+st.subheader('version beta1.10')
 
 client = connect_to_openai()
 index = connect_to_pinecone()
