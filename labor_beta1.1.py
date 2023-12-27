@@ -3,7 +3,7 @@ import pinecone
 import streamlit as st
 from firebase_admin import _apps, credentials, initialize_app, firestore
 import uuid
-
+from datetime import datetime
 
 def connect_to_openai():
     return OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
@@ -44,10 +44,10 @@ def vector_similarity(qvector):
     return nearest
 
 def save_to_firebase(db, session_id, question, answer):
-    timestamp = firestore.SERVER_TIMESTAMP
+    current_time = datetime.now()
+    timestamp = current_time.strftime('%Y-%m-%d %H:%M:%S')
     history = {'timestamp': timestamp, 'session_id': session_id, 'qustion': question, 'answer': answer}
-    db.collection('chat_history').add(history)
-
+    db.collection('chat_history').document(timestamp).set(history)
 
 def select_best(nearest):
     # 청크와 링크 쌍을 저장할 리스트 초기화
@@ -117,7 +117,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         # 청크 리스트 추출
         chunk_list = [match.metadata['chunk'] for match in nearest.matches]
 
-        # 관련 블로그 포스트 링크 추출
+        # 관련 내용을 담은 블로그 제목과 링크 추출
         best = select_best(nearest)
 
         st.session_state.messages.append({'role': 'system', 'content': f'관련 청크: {chunk_list}'})
