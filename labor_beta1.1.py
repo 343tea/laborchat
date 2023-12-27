@@ -86,6 +86,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
         qvector = query_to_embedding(prompt)
         nearest = vector_similarity(qvector)
 
+        best = ''
         chunk_list = []
         for i, match in enumerate(nearest.matches):
             chunk = match.metadata['chunk']
@@ -94,7 +95,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
             if i == 0:
                 title1 = chunk.split('|')[0]
                 link1 = match.metadata['link']
-                best = f'\n\n▲ 관련 내용 1 : [{title}](https://{link})'
+                best = f'\n\n▲ 관련 내용 1 : [{title1}](https://{link1})'
             elif i == 1:
                 title2 = chunk.split('|')[0]
                 link2 = match.metadata['link']
