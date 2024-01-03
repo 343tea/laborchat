@@ -135,7 +135,7 @@ if prompt := st.chat_input('질문을 입력하세요.'):
             full_response = ''
 
             # 대화 내역 관리: 가장 최근의 N개의 메시지만 유지
-            recent_messages = st.session_state.messages[-3:]  # 예시: 질문-답변 최근 3쌍만 유지
+            recent_messages = st.session_state.messages[-3:]
 
             # OpenAI API 호출해 답변 생성
             for response in client.chat.completions.create(
