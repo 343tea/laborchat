@@ -12,9 +12,7 @@ def connect_to_openai():
     return OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 def connect_to_pinecone():
-    pinecone(
-        api_key=st.secrets['PINECONE_API_KEY'],
-    )
+    pinecone(api_key=st.secrets['PINECONE_API_KEY'])
     index_name = st.secrets['PINECONE_INDEX_NAME']
     return pinecone.Index(index_name)
 
