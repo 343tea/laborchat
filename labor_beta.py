@@ -1,7 +1,7 @@
 # version: beta2
 
 from openai import OpenAI
-import pinecone
+from pinecone import Pinecone
 import streamlit as st
 from firebase_admin import _apps, credentials, initialize_app, firestore
 import uuid
@@ -12,7 +12,7 @@ def connect_to_openai():
     return OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 def connect_to_pinecone():
-    pc = pinecone(api_key=st.secrets['PINECONE_API_KEY'])
+    pc = Pinecone(api_key=st.secrets['PINECONE_API_KEY'])
     index_name = st.secrets['PINECONE_INDEX_NAME']
     return pc.Index(index_name)
 
