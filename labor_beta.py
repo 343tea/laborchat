@@ -12,12 +12,9 @@ def connect_to_openai():
     return OpenAI(api_key=st.secrets['OPENAI_API_KEY'])
 
 def connect_to_pinecone():
-    pinecone.init(
-        api_key=st.secrets['PINECONE_API_KEY'],
-        environment=st.secrets['PINECONE_ENVIRONMENT'],
-    )
+    pc = pinecone(api_key=st.secrets['PINECONE_API_KEY'])
     index_name = st.secrets['PINECONE_INDEX_NAME']
-    return pinecone.Index(index_name)
+    return pc.Index(index_name)
 
 def connect_to_firebase():
     if not _apps:
